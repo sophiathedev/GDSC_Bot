@@ -11,6 +11,9 @@ DEADLINE_DATETIME_FMT = "%d/%m/%Y"
 import discord
 from discord.ext import commands, tasks
 
+from main import GDSCBot, SERVER_GUILD_ID, SERVER_VERIFY_CHANNEL_ID, SERVER_WELCOME_CHANNEL_ID
+from main import SERVER_CORE_ROLE, SERVER_MANAGE_ROLE
+
 from deadline.utils.api import DeadlineSerializer, SheetAPI
 
 # google color :))) only blue green yellow and red
@@ -26,7 +29,7 @@ LOOP_TIME = time(hour=7) # default by 07:00
 
 class Deadline( commands.Cog ):
     def __init__( self, bot ):
-        self.bot = bot
+        self.bot: GDSCBot = bot
         # setup a task loop
         self.deadline_annouce.start()
 
@@ -52,11 +55,12 @@ class Deadline( commands.Cog ):
             await user.send(embed=annouce_card)
 
     @commands.command(
-        name="deadline_delete",
-        aliases=['dl_del'],
-        description="Xoá một hoặc nhiều deadline trong danh sách deadline",
-        brief="Xoá deadline hiện tại"
+        name="task_del",
+        aliases=['td'],
+        description="Xoá một hoặc nhiều task trong danh sách task",
+        brief="Xoá task hiện tại"
     )
+    @commands.has_any_role(SERVER_CORE_ROLE, SERVER_MANAGE_ROLE)
     async def deadline_delete( self, ctx: commands.Context[Any], *deadline_id: int ) -> None:
         for dl_id in deadline_id:
             # clear current deadline list that influence into currnet deadline
@@ -112,11 +116,12 @@ class Deadline( commands.Cog ):
             return False
 
     @commands.command(
-        name="deadline_refresh",
-        aliases=['dl_ref'],
-        description="Refresh một deadline hiện có trong database",
-        brief="Refresh một deadline hiện tại trong database"
+        name="task_refresh",
+        aliases=['tr'],
+        description="Refresh một task hiện có trong database",
+        brief="Refresh một task hiện tại trong database"
     )
+    @commands.has_any_role(SERVER_CORE_ROLE, SERVER_MANAGE_ROLE)
     async def deadline_refresh( self, ctx: commands.Context[Any], deadline_id: int ) -> None:
         deadline_url = self.bot.sql.execute(f"select url from Deadline where id = {deadline_id}").fetchone()[0]
         result =  await self.process_deadline(deadline_url, deadline_id)
@@ -128,11 +133,12 @@ class Deadline( commands.Cog ):
 
 
     @commands.command(
-        name="deadline",
-        aliases=['dl'],
-        description="Tạo một deadline mới bao gồm đường dẫn tới sheet deadline và tên deadline mới",
-        brief="Tạo một deadline mới"
+        name="task",
+        aliases=['t'],
+        description="Tạo một task mới bao gồm đường dẫn tới sheet deadline và tên deadline mới",
+        brief="Tạo một task mới"
     )
+    @commands.has_any_role(SERVER_CORE_ROLE, SERVER_MANAGE_ROLE)
     async def deadline( self, ctx: commands.Context[Any], url: str, *name ) -> None:
         name = ' '.join(list(name))
         last_id = int(self.bot.sql.execute(f"select seq from sqlite_sequence where name=\"Deadline\"").fetchone()[0]) + 1
@@ -146,11 +152,12 @@ class Deadline( commands.Cog ):
 
 
     @commands.command(
-        name="deadline_list",
-        aliases=['dl_list'],
-        description="Hiện danh sách deadline hiện tại",
-        brief="Lấy thông tin về danh sách deadline hiện tại"
+        name="task_list",
+        aliases=['tl'],
+        description="Hiện danh sách task hiện tại",
+        brief="Lấy thông tin về danh sách task hiện tại"
     )
+    @commands.has_any_role(SERVER_CORE_ROLE, SERVER_MANAGE_ROLE)
     async def deadline_list( self, ctx: commands.Context[Any] ) -> None:
         select_query = "select * from Deadline"
         all_deadline = self.bot.sql.execute(select_query).fetchall()[:5]
