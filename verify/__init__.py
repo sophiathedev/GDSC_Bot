@@ -87,13 +87,15 @@ class Verify( commands.Cog ):
         if searched == False:
             await member.send(f"**Không tìm thấy email trên cơ sở dữ liệu !**, Để tiến hành verify vui lòng ghé channel {verifyChannel.mention}.")
             return None
+        contactRole: str = self.user_df.loc[index, "Role"]
+        contactName: str = self.user_df.loc[index, "Tên"]
         generatorOTP: OTP = OTP(intervalTime=900) # OTP generator with expried time is 15 minutes as 900 seconds
         # store as another variable for easie reading and using
         currentOTPCode: str = generatorOTP.currentOTP
 
         # if message sent success
         if self.sendOTP(userEmail, currentOTPCode):
-            await member.send(f"Chắc hẳn bạn là **{self.user_df.loc[index, 'Tên']}** bạn cần xác minh danh tính thông qua email.\n\nMail chứa mã xác nhận đã được gửi tới **{userEmail}**. Vui lòng **check mail trong trang chính hoặc thư mục spam** để nhận được mã OTP có 8 chữ số.", view=DoesntReceiveOTPView(self.sendOTP, userEmail, currentOTPCode))
+            await member.send(f"Chắc hẳn bạn là **{contactName}** bạn cần xác minh danh tính thông qua email.\n\nMail chứa mã xác nhận đã được gửi tới **{userEmail}**. Vui lòng **check mail trong trang chính hoặc thư mục spam** để nhận được mã OTP có 8 chữ số.", view=DoesntReceiveOTPView(self.sendOTP, userEmail, currentOTPCode))
             failCount = 0
             verifyComplete = False
             countMessage: discord.Message = await member.send(f"Bạn còn **{3 - failCount}** lần thử mã.")
@@ -115,7 +117,7 @@ class Verify( commands.Cog ):
                 await countMessage.delete()
                 await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
             else:
-                self.bot.sql.execute(f'insert or ignore into User(name, discord_id, email) values(\"{self.user_df.loc[index, 'Tên']}\", {member.id}, \"{userEmail}\")')
+                self.bot.sql.execute(f'insert or ignore into User(name, discord_id, email) values(\"{contactName}\", {member.id}, \"{userEmail}\")')
                 # welcome channel
                 welcomeChannel: discord.TextChannel = self.bot.get_guild(SERVER_GUILD_ID).get_channel(SERVER_WELCOME_CHANNEL_ID)
                 # when verified complete
@@ -131,12 +133,11 @@ class Verify( commands.Cog ):
                 }
                 verifiedMember: discord.Member = member
                 try:
-                    memberRole: str = self.user_df.loc[index, 'Role']
-                    if "Lead" in memberRole or "Core" in memberRole:
+                    if "Lead" in contactRole or "Core" in contactRole:
                         await verifiedMember.add_roles(verifiedRole["Core"])
                     else:
-                        await verifiedMember.add_roles(verifiedRole[memberRole])
-                    await verifiedMember.edit(nick=f"{self.user_df.loc[index, 'Tên']} - {self.user_df.loc[index, 'Role']}")
+                        await verifiedMember.add_roles(verifiedRole[contactRole])
+                    await verifiedMember.edit(nick=f"{contactName} - {contactRole}")
                     #await verifiedMember.add_roles(verifiedRole)
                     pass
                 except discord.Forbidden as e:
