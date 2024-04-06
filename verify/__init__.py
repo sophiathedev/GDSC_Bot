@@ -63,6 +63,11 @@ class Verify( commands.Cog ):
     #    await self.verifyUser(member)
 
     async def verifyUser(self, member: discord.Member) -> None:
+        # query if user already verified
+        queryExists = self.bot.sql.execute(f'select discord_id from User where discord_id = \"{member.id}\"').fetchone()
+        if not queryExists is None:
+            await member.send("\n**Bạn đã xác minh danh tính rồi vui lòng quay trở lại :face_with_symbols_over_mouth:**\n")
+            return None
         await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI DISCORD SERVER CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
 
         def emailCheck( m: discord.Message ):
