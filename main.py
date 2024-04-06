@@ -23,6 +23,19 @@ COMMAND_PREFIX:str = str(environ['COMMAND_PREFIX'])
 VERIFY_MAIL: str = str(environ['VERIFY_MAIL_EMAIL'])
 VERIFY_MAIL_PASSWORD: str = str(environ['VERIFY_MAIL_PASSWORD'])
 
+# dynamic id
+SERVER_GUILD_ID: int = int(environ['SERVER_GUILD_ID'])
+SERVER_VERIFY_CHANNEL_ID: int = int(environ['SERVER_VERIFY_CHANNEL_ID'])
+SERVER_WELCOME_CHANNEL_ID: int = int(environ['SERVER_WELCOME_CHANNEL_ID'])
+
+SERVER_MANAGE_ROLE: int = int(environ['SERVER_MANAGE_ROLE'])
+SERVER_TECH_ROLE: int = int(environ['SERVER_TECH_ROLE'])
+SERVER_HR_ROLE: int = int(environ['SERVER_HR_ROLE'])
+SERVER_DES_ROLE: int = int(environ['SERVER_DES_ROLE'])
+SERVER_PR_ROLE: int = int(environ['SERVER_PR_ROLE'])
+SERVER_MEDIA_ROLE: int = int(environ['SERVER_MEDIA_ROLE'])
+SERVER_CORE_ROLE: int = int(environ['SERVER_CORE_ROLE'])
+
 class GDSCBot( commands.Bot ):
     def __init__( self, command_prefix: str,  self_bot:bool = False ) -> None:
         # setup email object
@@ -74,7 +87,8 @@ class GDSCBot( commands.Bot ):
             return None
         try:
             await self.process_commands(message)
-            self.log.info(f'\"{message.author.global_name}\" execute \"{message.content}\"')
+            if message.content.startswith(COMMAND_PREFIX):
+                self.log.info(f'\"{message.author.global_name}\" execute \"{message.content}\"')
             self.db_conn.commit()
         except commands.errors.CommandNotFound as e:
             if not message.content.startswith(COMMAND_PREFIX):
