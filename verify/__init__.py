@@ -70,7 +70,15 @@ class Verify( commands.Cog ):
             return None
         await member.send("**CHÀO MỪNG BẠN ĐẾN VỚI DISCORD SERVER CỦA GDSC PTIT**\n\nBut, One more thing...\n\nBạn vui lòng gửi email của bạn để xác minh danh tính (<name>@gdscptit.dev). **Lưu ý: admin sẽ nhìn thấy mail mà bạn sử dụng để xác minh danh tính.**")
 
+        # checking process for each DM
+        def check_dm( m: discord.Message ):
+            if m.author != member or not isinstance(m.channel, discord.DMChannel):
+                return False
+            return True
+
         def emailCheck( m: discord.Message ):
+            if check_dm(m) == False:
+                return False
             return ("@gdscptit.dev" in m.content)
 
         # server verify channel for mention
@@ -107,7 +115,7 @@ class Verify( commands.Cog ):
             while failCount < 3:
                 await countMessage.edit(content=f"Bạn còn **{3 - failCount}** lần thử mã.")
                 try:
-                    userProvideOTP: discord.Message = await self.bot.wait_for('message', check=lambda x: True, timeout=120.0)
+                    userProvideOTP: discord.Message = await self.bot.wait_for('message', check=check_dm, timeout=120.0)
                 except asyncio.TimeoutError:
                     await member.send(f"**Đã hết 2 phút nhưng bạn vẫn chưa điền OTP**.\nĐể xác minh danh tính bạn vui lòng vào discord server của GDSC PTIT để xác minh lại tại channel {verifyChannel.mention}")
 
