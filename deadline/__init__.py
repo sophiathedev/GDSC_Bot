@@ -112,7 +112,7 @@ class Deadline( commands.Cog ):
 
             return True
         except Exception as e:
-            raise e
+            self.bot.log.error(e)
             return False
 
     @commands.command(
