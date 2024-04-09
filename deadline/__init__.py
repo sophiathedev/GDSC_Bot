@@ -141,11 +141,10 @@ class Deadline( commands.Cog ):
     @commands.has_any_role(SERVER_CORE_ROLE, SERVER_MANAGE_ROLE)
     async def deadline( self, ctx: commands.Context[Any], url: str, *name ) -> None:
         name = ' '.join(list(name))
-        last_id = self.bot.sql.execute(f"select seq from sqlite_sequence where name=\"Deadline\"").fetchone()
-        if last_id is None:
+        try:
+            last_id = int(self.bot.sql.execute(f"select seq from sqlite_sequence where name=\"Deadline\"").fetchone()[0]) + 1
+        except:
             last_id = 1
-        else:
-            last_id = int(last_id[0]) + 1
         self.bot.sql.execute(f"insert into Deadline( name, url ) values(\"{name}\", \"{url}\")")
         result = await self.process_deadline( url, last_id )
         if result:
