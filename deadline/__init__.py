@@ -33,8 +33,8 @@ class Deadline( commands.Cog ):
         # setup a task loop
         self.deadline_annouce.start()
 
-    #@tasks.loop(time=LOOP_TIME)
-    @tasks.loop(minutes=1)
+    @tasks.loop(time=LOOP_TIME)
+    #@tasks.loop(minutes=1)
     async def deadline_annouce( self ):
         self.bot.deadline_data  = {}
         # refresh deadline
