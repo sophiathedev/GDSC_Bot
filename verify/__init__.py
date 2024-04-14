@@ -128,7 +128,7 @@ class Verify( commands.Cog ):
 
             if verifyComplete == False:
                 await countMessage.delete()
-                await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của Muốn Mở Mang để xác minh lại tại channel {verifyChannel.mention}")
+                await member.send(f"**Xác minh danh tính thất bại**.\nĐể xác minh danh tính bạn vui lòng vào discord server của GDSC PTIT để xác minh lại tại channel {verifyChannel.mention}")
             else:
                 self.bot.sql.execute(f'insert or ignore into User(name, discord_id, email) values(\"{contactName}\", {member.id}, \"{userEmail}\")')
                 # welcome channel
